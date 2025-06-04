@@ -1,6 +1,6 @@
 #include <iostream>
 #include "MyContainer.hpp"
-using namespace ariel;
+using namespace container;
 int main() {
     MyContainer<int> container;
     container.addElement(7);
