@@ -1,0 +1,10 @@
+{
+  "editor.suggestOnTriggerCharacters": true,
+  "editor.quickSuggestions": {
+    "comments": false,
+    "strings": false,
+    "other": true
+  },
+  "editor.parameterHints.enabled": true,
+  "editor.acceptSuggestionOnEnter": "smart"
+}
