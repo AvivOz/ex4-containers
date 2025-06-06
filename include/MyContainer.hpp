@@ -123,20 +123,29 @@ namespace containers {
         private:
             const MyContainer* container; ///< Pointer to the container being iterated
             size_t current;               ///< Current position in the container
-        
+            bool is_end;
+
         public:
             /**
              * @brief Constructor
              * @param c Pointer to the container to iterate over
              */
-            explicit Order(const MyContainer* c) : container(c), current(0) {}
+            explicit Order(const MyContainer* c, bool end = false) : 
+                    container(c), 
+                    current(end || c->size() == 0 ? c->size() : 0),
+                    is_end(end || c->size() == 0) {}
 
+            bool operator==(const Order& other) const {
+                return current == other.current;
+            }        
             /**
              * @brief Inequality comparison operator
              * @param other Another iterator to compare with
              * @return true if iterators are not at the same position
              */
             bool operator!=(const Order& other) const {
+                if (is_end) return current != other.current;
+                if (other.is_end) return current != other.current;
                 return current != other.current;
             }
 
@@ -145,6 +154,9 @@ namespace containers {
              * @return Const reference to the current element
              */
             const T& operator*() const {
+                 if (current >= container->size()) {
+                    throw std::out_of_range("Iterator out of bounds");
+                }
                 return (*container)[current];
             }
         
@@ -154,7 +166,9 @@ namespace containers {
              * @return Reference to this iterator after incrementing
              */
             Order& operator++() {
-                ++current;
+                if (current < container->size()) {
+                    ++current;
+                }
                 return *this;
             }
 
@@ -162,8 +176,8 @@ namespace containers {
              * @brief Get iterator to the beginning
              * @return Iterator pointing to the first element
              */
-            Order begin() const { 
-                return Order(container); 
+            Order begin() const {
+                return Order(container, false);
             }
 
             /**
@@ -171,9 +185,7 @@ namespace containers {
              * @return Iterator pointing one past the last element
              */
             Order end() const {
-                Order end_it(container);
-                end_it.current = container->size();
-                return end_it;
+                return Order(container, true);
             }
         };
 
@@ -186,16 +198,24 @@ namespace containers {
             private:
                 const MyContainer* container; ///< Pointer to the container being iterated
                 size_t current;               ///< Current position in the container
+                bool is_end;
 
             public:
                 /**
                  * @brief Constructor
                  * @param c Pointer to the container to iterate over
                  */
-                explicit ReverseOrder(const MyContainer* c) : 
-                    container(c),
-                    current(c->size() > 0 ? c->size() - 1 : 0) {}
+                explicit ReverseOrder(const MyContainer* c, bool end = false) : 
+                        container(c), 
+                        current(end || c->size() == 0 ? 0 : c->size() - 1),
+                        is_end(end || c->size() == 0) {}
 
+                ReverseOrder(const ReverseOrder& other) : container(other.container), current(other.current) {}
+
+
+                bool operator==(const ReverseOrder& other) const {
+                    return current == other.current && is_end == other.is_end;
+                }
 
                 /**
                  * @brief Inequality comparison operator
@@ -203,7 +223,7 @@ namespace containers {
                  * @return true if iterators are not at the same position
                  */
                 bool operator!=(const ReverseOrder& other) const {
-                    return current != other.current;
+                    return !(*this == other);
                 }
 
                 /**
@@ -211,6 +231,9 @@ namespace containers {
                  * @return Const reference to the current element
                  */
                 const T& operator*() const {
+                    if (is_end || current >= container->size()) {
+                        throw std::out_of_range("Iterator out of bounds");
+                    }
                     return (*container)[current];
                 }
 
@@ -219,7 +242,11 @@ namespace containers {
                  * @return Reference to this iterator after decrementing
                  */
                 ReverseOrder& operator++() {
-                    if (current > 0) --current;
+                    if (!is_end && current > 0) {
+                        --current;
+                    } else {
+                        is_end = true;
+                    }
                     return *this;
                 }
 
@@ -227,8 +254,8 @@ namespace containers {
                  * @brief Get iterator to the beginning (end of container)
                  * @return Iterator pointing to the last element
                  */
-                ReverseOrder begin() const { 
-                    return ReverseOrder(container); 
+                ReverseOrder begin() const {
+                    return ReverseOrder(container, false);
                 }
 
                 /**
@@ -236,9 +263,7 @@ namespace containers {
                  * @return Iterator pointing before the first element
                  */
                 ReverseOrder end() const {
-                    ReverseOrder end_it(container);
-                    end_it.current = static_cast<size_t>(-1);
-                    return end_it;
+                    return ReverseOrder(container, true);
                 }
         };
 
@@ -252,13 +277,17 @@ namespace containers {
             const MyContainer* container;       ///< Pointer to the container being iterated
             std::vector<size_t> sorted_indices; ///< Indices sorted by element values
             size_t current;                     ///< Current position in sorted_indices
+            bool is_end;
 
         public:
             /**
              * @brief Constructor
              * @param c Pointer to the container to iterate over
              */
-            explicit AscendingOrder(const MyContainer* c) : container(c), current(0) {
+            explicit AscendingOrder(const MyContainer* c, bool end = false) : 
+                container(c), 
+                current(end || c->size() == 0 ? c->size() : 0),
+                is_end(end || c->size() == 0) {
                 sorted_indices.resize(c->size());
                 for (size_t i = 0; i < c->size(); ++i) {
                     sorted_indices[i] = i;
@@ -267,6 +296,12 @@ namespace containers {
                     [c](size_t i1, size_t i2) {
                         return (*c)[i1] < (*c)[i2];
                     });
+            }
+
+            AscendingOrder(const AscendingOrder& other) = default;
+
+            bool operator==(const AscendingOrder& other) const {
+                return current == other.current;
             }
 
             /**
@@ -283,6 +318,9 @@ namespace containers {
              * @return Const reference to the current element
              */
             const T& operator*() const {
+                if (current >= container->size()) {
+                    throw std::out_of_range("Iterator out of bounds");
+                }
                 return (*container)[sorted_indices[current]];
             }
 
@@ -291,7 +329,9 @@ namespace containers {
              * @return Reference to this iterator after incrementing
              */
             AscendingOrder& operator++() {
-                ++current;
+                if (current < container->size()) {
+                    ++current;
+                }
                 return *this;
             }
 
@@ -299,8 +339,8 @@ namespace containers {
              * @brief Get iterator to the beginning (smallest element)
              * @return Iterator pointing to the smallest element
              */
-            AscendingOrder begin() const { 
-                return AscendingOrder(container); 
+            AscendingOrder begin() const {
+                return AscendingOrder(container, false);
             }
 
              /**
@@ -308,9 +348,7 @@ namespace containers {
              * @return Iterator pointing past the largest element
              */
             AscendingOrder end() const {
-                AscendingOrder end_it(container);
-                end_it.current = container->size();
-                return end_it;
+                return AscendingOrder(container, true);
             }
         };
 
@@ -323,9 +361,9 @@ namespace containers {
         private:
             const MyContainer* container;        ///< Pointer to the container being iterated
             std::vector<size_t> sorted_indices; ///< Indices sorted by element values
-            size_t curren;                      ///< Current position in sorted_indices
+            size_t current;                     ///< Current position in sorted_indices
 
-        punlic:
+        public:
             /**
              * @brief Constructor
              * @param c Pointer to the container to iterate over
@@ -341,6 +379,10 @@ namespace containers {
                     });
             }
             
+            bool operator==(const DescendingOrder& other) const {
+                return current == other.current;
+            }
+
              /**
              * @brief Inequality comparison operator
              * @param other Another iterator to compare with
@@ -396,35 +438,48 @@ namespace containers {
             const MyContainer* container; ///< Pointer to the container being iterated
             std::vector<size_t> indices;  ///< Pre-calculated iteration order
             size_t current;               ///< Current position in indices
+            bool is_end;
 
         public: 
             /**
              * @brief Constructor
              * @param c Pointer to the container to iterate over
              */
-            explicit SideCrossOrder(const MyContainer* c) : container(c), current(0) {
-                std::vector<size_t> sorted_indices(c->size());
-                for (size_t i = 0; i < c->size(); ++i) {
-                    sorted_indices[i] = i;
+            explicit SideCrossOrder(const MyContainer* c, bool end = false) : 
+                container(c), 
+                current(0),
+                is_end(end) {
+                
+                if (c->size() == 0 || end) {
+                    is_end = true;
+                    return;
                 }
                 
-                std::sort(sorted_indices.begin(), sorted_indices.end(),
-                    [c](size_t i1, size_t i2) {
-                        return (*c)[i1] < (*c)[i2];
-                    });
+                std::vector<std::pair<T, size_t>> sorted;
+                for (size_t i = 0; i < c->size(); ++i) {
+                    sorted.push_back({(*c)[i], i});
+                }
+                std::sort(sorted.begin(), sorted.end());
 
-                indices.reserve(c->size());
+                indices.resize(c->size());
+                size_t idx = 0;
                 size_t left = 0;
-                size_t right = sorted_indices.size() - 1;
+                size_t right = sorted.size() - 1;
                 
                 while (left <= right) {
                     if (left == right) {
-                        indices.push_back(sorted_indices[left]);
+                        indices[idx] = sorted[left].second;
                         break;
                     }
-                    indices.push_back(sorted_indices[left++]);
-                    indices.push_back(sorted_indices[right--]);
+                    indices[idx++] = sorted[left++].second;
+                    indices[idx++] = sorted[right--].second;
                 }
+            }
+
+            bool operator==(const SideCrossOrder& other) const {
+                if (is_end && other.is_end) return true;
+                if (is_end || other.is_end) return false;
+                return current == other.current;
             }
 
             /**
@@ -433,7 +488,7 @@ namespace containers {
              * @return true if iterators are not at the same position
              */
             bool operator!=(const SideCrossOrder& other) const {
-                return current != other.current;
+                return !(*this == other);
             }
 
             /**
@@ -441,6 +496,9 @@ namespace containers {
              * @return Const reference to the current element
              */
             const T& operator*() const {
+                if (is_end || current >= container->size()) {
+                    throw std::out_of_range("Iterator out of bounds");
+                }
                 return (*container)[indices[current]];
             }
 
@@ -449,7 +507,12 @@ namespace containers {
              * @return Reference to this iterator after incrementing
              */
             SideCrossOrder& operator++() {
-                ++current;
+                if (!is_end) {
+                    ++current;
+                    if (current >= indices.size()) {
+                        is_end = true;
+                    }
+                }
                 return *this;
             }
 
@@ -466,9 +529,7 @@ namespace containers {
              * @return Iterator pointing past the last element
              */
             SideCrossOrder end() const {
-                SideCrossOrder end_it(container);
-                end_it.current = container->size();
-                return end_it;
+                return SideCrossOrder(container, true);
             }
         };
 
@@ -482,25 +543,62 @@ namespace containers {
             const MyContainer* container; ///< Pointer to the container being iterated
             std::vector<size_t> indices;  ///< Pre-calculated iteration order
             size_t current;               ///< Current position in indices
+            bool is_end;
 
         public:
             /**
              * @brief Constructor
              * @param c Pointer to the container to iterate over
              */
-            explicit MiddleOutOrder(const MyContainer* c) : container(c), current(0) {
-                indices.reserve(c->size());
+            explicit MiddleOutOrder(const MyContainer* c, bool end = false) : 
+                container(c), 
+                current(end ? c->size() : 0),
+                is_end(end || c->size() == 0) {
+                
                 if (c->size() == 0) return;
-                
+
+                indices.resize(c->size());
                 size_t mid = c->size() / 2;
-                indices.push_back(mid);
+                size_t index = 0;
                 
-                for (size_t i = 1; i <= mid; ++i) {
-                    if (mid - i >= 0)
-                        indices.push_back(mid - i);
-                    if (mid + i < c->size())
-                        indices.push_back(mid + i);
+                if (c->size() % 2 == 0) {
+                    indices[index++] = mid - 1;  
+                    indices[index++] = mid - 2;  
+                    indices[index++] = mid;      
+                    indices[index++] = mid + 1;  
+                    
+                    for (size_t i = 2; index < c->size(); ++i) {
+                        if (mid - i - 1 < c->size()) {
+                            indices[index++] = mid - i - 1;
+                        }
+                        if (mid + i < c->size() && index < c->size()) {
+                            indices[index++] = mid + i;
+                        }
+                    }
                 }
+                else {
+                    indices[index++] = mid;      
+                    indices[index++] = mid - 1;  
+                    indices[index++] = mid + 1;  
+                    
+                    for (size_t i = 2; index < c->size(); ++i) {
+                        if (mid - i >= 0 && index < c->size()) {
+                            indices[index++] = mid - i;
+                        }
+                        if (mid + i < c->size() && index < c->size()) {
+                            indices[index++] = mid + i;
+                        }
+                    }
+                }
+            }
+
+            /**
+             * @brief Copy constructor
+             */
+            MiddleOutOrder(const MiddleOutOrder& other) = default;
+
+            bool operator==(const MiddleOutOrder& other) const {
+                return current == other.current;
             }
 
             /**
@@ -517,6 +615,9 @@ namespace containers {
              * @return Const reference to the current element
              */
             const T& operator*() const {
+                if (is_end || current >= container->size()) {
+                    throw std::out_of_range("Iterator out of bounds");
+                }
                 return (*container)[indices[current]];
             }
 
@@ -525,7 +626,9 @@ namespace containers {
              * @return Reference to this iterator after incrementing
              */
             MiddleOutOrder& operator++() {
-                ++current;
+                if (current < container->size()) {
+                    ++current;
+                }
                 return *this;
             }
 
@@ -534,7 +637,7 @@ namespace containers {
              * @return Iterator pointing to the middle element
              */
             MiddleOutOrder begin() const { 
-                return MiddleOutOrder(container); 
+                return MiddleOutOrder(container, false); 
             }
 
             /**
@@ -542,11 +645,15 @@ namespace containers {
              * @return Iterator pointing past the last element
              */
             MiddleOutOrder end() const {
-                MiddleOutOrder end_it(container);
-                end_it.current = container->size();
-                return end_it;
+                return MiddleOutOrder(container, true);
             }
         };
+
+        /**
+         * @brief Get iterator for regular order traversal (as inserted)
+         * @return Order iterator
+         */
+        Order getOrder() const { return Order(this); }
 
         /**
          * @brief Get iterator for reverse order traversal

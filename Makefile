@@ -1,22 +1,31 @@
 # author: avivoz4@gmail.com
 
-CXX = clang++
-CXXFLAGS = -std=c++17 -Wall -Pedantic
-INCLUDE = -I./include
+CXX = g++
+CXXFLAGS = -std=c++17 -Wall -pedantic
+INCLUDE = -I./include -I./tests
 
-.PHONY: all clean test Main valgrind
+.PHONY: all clean run test valgrind
 
-all: test Main
+all: main test
 
-Main: src/Demo.cpp
-	$(CXX) $(CXXFLAGS) $(INCLUDE) src/Demo.cpp -o Demo
+main: main.cpp include/MyContainer.hpp
+	$(CXX) $(CXXFLAGS) $(INCLUDE) main.cpp -o main
 
-test: test/TestMyContainer.cpp
-	$(CXX) $(CXXFLAGS) $(INCLUDE) test/TestMyContainer.cpp -o test_runner
+test: tests/TestMyContainer.cpp include/MyContainer.hpp
+	$(CXX) $(CXXFLAGS) $(INCLUDE) -o test_runner tests/TestMyContainer.cpp
+
+run: main
+	./main
+
+run-all: main test
+	./main
 	./test_runner
 
-valgrind: Main
-	valgrind --leak-check=full --show-leak-kinds=all ./Demo
+valgrind: main
+	valgrind --leak-check=full --show-leak-kinds=all ./main
+
+valgrind-test: test
+	valgrind --leak-check=full --show-leak-kinds=all ./test_runner
 
 clean:
-	rm -f Demo test_runner
+	rm -f main test_runner

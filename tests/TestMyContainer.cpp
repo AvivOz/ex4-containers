@@ -7,6 +7,7 @@
  * @date 2025-06-05 13:46:18
  */
 
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest.h"
 #include "../include/MyContainer.hpp"
 #include <stdexcept>
@@ -87,7 +88,7 @@ TEST_CASE("Regular Order Iterator") {
     
     SUBCASE("Empty container") {
         auto it = container.getOrder();
-        CHECK(it.begin() != it.end());
+        CHECK(it.begin() == it.end());  
     }
 
     SUBCASE("Container with elements") {
@@ -110,7 +111,7 @@ TEST_CASE("Reverse Order Iterator") {
     
     SUBCASE("Empty container") {
         auto it = container.getReverseOrder();
-        CHECK(it.begin() != it.end());
+        CHECK(it.begin() == it.end());
     }
 
     SUBCASE("Container with elements") {
@@ -134,7 +135,7 @@ TEST_CASE("Ascending Order Iterator") {
     
     SUBCASE("Empty container") {
         auto it = container.getAscendingOrder();
-        CHECK(it.begin() != it.end());
+        CHECK(it.begin() == it.end());
     }
 
     SUBCASE("Container with elements") {
@@ -158,7 +159,7 @@ TEST_CASE("Descending Order Iterator") {
     
     SUBCASE("Empty container") {
         auto it = container.getDescendingOrder();
-        CHECK(it.begin() != it.end());
+        CHECK(it.begin() == it.end());
     }
 
     SUBCASE("Container with elements") {
@@ -182,7 +183,7 @@ TEST_CASE("Side Cross Order Iterator") {
     
     SUBCASE("Empty container") {
         auto it = container.getSideCrossOrder();
-        CHECK(it.begin() != it.end());
+        CHECK(it.begin() == it.end());
     }
 
     SUBCASE("Container with elements") {
@@ -221,7 +222,7 @@ TEST_CASE("Middle Out Order Iterator") {
     
     SUBCASE("Empty container") {
         auto it = container.getMiddleOutOrder();
-        CHECK(it.begin() != it.end());
+        CHECK(it.begin() == it.end());
     }
 
     SUBCASE("Even number of elements") {
