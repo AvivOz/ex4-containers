@@ -16,7 +16,7 @@
  * 6. Middle Out Order - Elements starting from middle and moving outwards
  * 
  * @author Aviv Oz
- * @date 2025-06-05
+ * @date 2025-06-06 15:46:10
  * @file main.cpp
  */
 
@@ -50,37 +50,37 @@ int main() {
     cout << "\nTesting all iteration orders:\n" << endl;
 
     // Regular order - should print: 3 1 5 2 4
-    auto order = container.getOrder();
+    auto order = container.order();
     auto it = order.begin();
     auto end = order.end();
     printWithIterator("Regular Order", it, end);
 
     // Reverse order - should print: 4 2 5 1 3
-    auto reverseOrder = container.getReverseOrder();
+    auto reverseOrder = container.reverse_order();
     auto revIt = reverseOrder.begin();
     auto revEnd = reverseOrder.end();
     printWithIterator("Reverse Order", revIt, revEnd);
 
     // Ascending order - should print: 1 2 3 4 5
-    auto ascOrder = container.getAscendingOrder();
+    auto ascOrder = container.ascending_order();
     auto ascIt = ascOrder.begin();
     auto ascEnd = ascOrder.end();
     printWithIterator("Ascending Order", ascIt, ascEnd);
 
     // Descending order - should print: 5 4 3 2 1
-    auto descOrder = container.getDescendingOrder();
+    auto descOrder = container.descending_order();
     auto descIt = descOrder.begin();
     auto descEnd = descOrder.end();
     printWithIterator("Descending Order", descIt, descEnd);
 
     // Side cross order - should print: 1 5 2 4 3
-    auto crossOrder = container.getSideCrossOrder();
+    auto crossOrder = container.side_cross_order();
     auto crossIt = crossOrder.begin();
     auto crossEnd = crossOrder.end();
     printWithIterator("Side Cross Order", crossIt, crossEnd);
 
     // Middle out order - should print: 5 1 2 3 4
-    auto middleOrder = container.getMiddleOutOrder();
+    auto middleOrder = container.middle_out_order();
     auto middleIt = middleOrder.begin();
     auto middleEnd = middleOrder.end();
     printWithIterator("Middle Out Order", middleIt, middleEnd);
